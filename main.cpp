@@ -11,7 +11,9 @@ int main(int argc, char *argv[])
 
     Game game;
 
-    qmlRegisterType<Game>("WFLetterCounter",1,0,"Game");
+    qmlRegisterUncreatableType<Game>("WFLetterCounter",1,0,"Game","Computer says NO");
+    qmlRegisterUncreatableType<Letters>("WFLetterCounter",1,0,"Letters","Computer says NO");
+    qmlRegisterUncreatableType<Words>("WFLetterCounter",1,0,"Words","Computer says NO");
 
     QQuickView view;
     view.setResizeMode(QQuickView::SizeRootObjectToView);

@@ -7,6 +7,43 @@ Rectangle {
    width: 640
    height: 480
 
+   focus: true
+
+   function addLetter(letter) {
+      return game.addLetter(letter);
+   }
+   function backspace() {
+      game.backspace();
+   }
+   function addWord() {
+      game.addWord();
+   }
+   function deleteWord() {
+      game.deleteWord();
+   }
+
+   Keys.onPressed: {
+      event.accepted = true;
+      switch(event.key)
+      {
+      case Qt.Key_Backspace:
+         backspace();
+         return;
+      case Qt.Key_Return:
+      case Qt.Key_Enter:
+         addWord();
+         return;
+      case Qt.Key_Delete:
+         deleteWord();
+         return;
+      }
+
+      if(addLetter(event.text))
+         return;
+
+      event.accepted = false;
+   }
+
    Component {
       id: letterDelegate
       Item {
@@ -16,7 +53,9 @@ Rectangle {
          height: GridView.view.cellWidth
 
          property int rem: remaining
-         property color bgColor: remaining > 0 ? "green" : "gray"
+         property color bgColor: capacity === 0 ? "gray" :
+                                 remaining > 1 ? "green" :
+                                 remaining === 1 ? "orange" : "red"
 
          Rectangle {
             anchors.fill: parent
@@ -30,80 +69,58 @@ Rectangle {
             text: letter + " " + remaining
             font.pixelSize: 25
          }
+
+         MouseArea {
+            anchors.fill: parent
+            onClicked: addLetter(letter);
+         }
       }
    }
 
-   ColumnLayout {
-      anchors.fill: parent
+   Text {
+      anchors.centerIn: parent
+      font.pixelSize: 15
+      text: "Total: " + game.remTotal
+            + " Vowels: " + game.remVowels
+            + " Consonants: " + game.remConsonants
+            + " Wildcards: " + game.remWildcards
+   }
 
-      Text {
-         Layout.fillWidth: true
+   ListView {
 
+      anchors.top: parent.top
+      anchors.left: parent.left
+      anchors.right: parent.right
+      anchors.bottom: keyboard.top
+
+      model: game.words
+      delegate: Text {
+         text: (index+1) + ": " + word
          font.pixelSize: 25
-         text: "Total: " + game.remTotal
-               + "\nVowels: " + game.remVowels
-               + "\nConsonants: " + game.remConsonants
-               + "\nWildcards: " + game.remWildcards
+      }
+      highlightFollowsCurrentItem: true
+      highlight: Rectangle {
+         color: "green"
+         width: ListView.width
+         height: 30
+      }
+      onCountChanged: {
+         currentIndex = count-1
       }
 
-      GridView {
-         Layout.fillWidth: true
-         Layout.fillHeight: true
+   }
 
-         cellWidth: 64
-         cellHeight: 64
+   GridView {
+      id: keyboard
+      anchors.bottom: parent.bottom
+      anchors.left: parent.left
+      anchors.right: parent.right
+      height: cellHeight*3
 
-         model: game
-         delegate: letterDelegate
-      }
+      cellWidth: width/11.5
+      cellHeight: cellWidth
 
-      Text {
-         Layout.fillWidth: true
-         Layout.minimumHeight: 30
-
-         text: "Enter word below. Press return/enter to apply."
-      }
-
-      Item {
-         Layout.fillWidth: true
-         Layout.minimumHeight: 30
-
-         Rectangle {
-            anchors.fill: parent
-            color: wordInput.wordStatus === Game.EmptyWord ? "gray" :
-                   wordInput.wordStatus === Game.InvalidWord ? "red" :
-                   wordInput.wordStatus === Game.ValidWord ? "green" :
-                                                             "orange"
-         }
-
-         TextInput {
-            anchors.fill: parent
-
-            id: wordInput
-
-            font.pixelSize: 25
-
-            property int wordStatus: Game.EmptyWord
-
-            onTextChanged: {
-               wordStatus = game.wordValidity(text);
-            }
-            onAccepted: {
-               game.applyWord(text);
-               text = "";
-            }
-         }
-      }
-
-      Text {
-         Layout.fillWidth: true
-         Layout.minimumHeight: 30
-
-         text: (wordInput.wordStatus === Game.EmptyWord ? "" :
-               wordInput.wordStatus === Game.InvalidWord ? "Not enough letters left for that" :
-               wordInput.wordStatus === Game.ValidWord ? "Good to go" :
-                                                         "Will use wildcards for that")
-      }
-
+      model: game.letters
+      delegate: letterDelegate
    }
 }
