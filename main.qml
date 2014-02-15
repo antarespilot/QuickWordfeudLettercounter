@@ -165,7 +165,7 @@ Rectangle {
             height: 25
             color: "red"
             radius: 5
-            visible: wordDelegate.isCurrentItem
+            visible: wordDelegate.isCurrentItem && index > 0
             Text {
                anchors.centerIn: parent
                color: "white"
