@@ -4,8 +4,9 @@ import QtQuick.Layouts 1.1
 import WFLetterCounter 1.0
 
 Rectangle {
-   width: 640
+   width: 800
    height: 480
+   color: "#ff333333"
 
    focus: true
 
@@ -59,15 +60,17 @@ Rectangle {
 
          Rectangle {
             anchors.fill: parent
-            anchors.margins: 5
+            anchors.margins: 2
             color: letterman.bgColor
+            border.color: "black"
+            border.width: 2
             radius: 5
          }
 
          Text {
             anchors.centerIn: parent
             text: letter + " " + remaining
-            font.pixelSize: 25
+            font.pixelSize: 35
          }
 
          MouseArea {
@@ -77,33 +80,104 @@ Rectangle {
       }
    }
 
-   Text {
-      anchors.centerIn: parent
-      font.pixelSize: 15
-      text: "Total: " + game.remTotal
-            + " Vowels: " + game.remVowels
-            + " Consonants: " + game.remConsonants
-            + " Wildcards: " + game.remWildcards
+   Rectangle {
+      id: stats
+      anchors.right: parent.right
+      anchors.top: parent.top
+      anchors.bottom: keyboard.top
+      anchors.margins: 5
+      width: 150
+      color: "transparent"
+      border.color: "black"
+      border.width: 2
+      radius: 5
+
+      Text {
+         anchors.fill: parent
+         anchors.margins: 5
+         font.pixelSize: 22
+         color: "white"
+         text: "Total left:<br><b>" + game.remTotal
+               + "</b><br>Vowels:<br><b>" + game.remVowels
+               + "</b><br>Consonants:<br><b>" + game.remConsonants
+               + "</b><br>Wildcards:<br><b>" + game.remWildcards
+         textFormat: Text.StyledText
+      }
    }
 
    ListView {
 
+      id: wordlist
       anchors.top: parent.top
       anchors.left: parent.left
-      anchors.right: parent.right
+      anchors.right: stats.left
       anchors.bottom: keyboard.top
+      anchors.margins: 5
+      clip: true
 
       model: game.words
-      delegate: Text {
-         text: (index+1) + ": " + word
-         font.pixelSize: 25
-      }
-      highlightFollowsCurrentItem: true
-      highlight: Rectangle {
-         color: "green"
-         width: ListView.width
+      delegate: Item {
+         width: wordlist.width
          height: 30
+         id: wordDelegate
+         property bool isCurrentItem: ListView.isCurrentItem
+
+         Text {
+            id: wordIndex
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.left: parent.left
+            anchors.margins: 5
+            text: (index+1)
+            font.pixelSize: 25
+            width: 40
+            height: 30
+            color: "white"
+         }
+
+         Text {
+            id: theword
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.left: wordIndex.right
+            anchors.margins: 5
+            text: word
+            font.pixelSize: 25
+            color: "white"
+         }
+
+         Rectangle {
+            id: cursor
+            anchors.verticalCenter: parent.verticalCenter
+            height: 30
+            anchors.left: theword.right
+            color: "white"
+            width: 5
+            radius: 5
+
+            ColorAnimation on color { from: "white"; to: "black"; duration: 500; loops: Animation.Infinite; running: cursor.visible }
+            visible: wordDelegate.isCurrentItem
+         }
+
+         Rectangle {
+            id: deleteButton
+            anchors.right: parent.right
+            anchors.verticalCenter: parent.verticalCenter
+            width: 25
+            height: 25
+            color: "red"
+            radius: 5
+            visible: wordDelegate.isCurrentItem
+            Text {
+               anchors.centerIn: parent
+               color: "white"
+               text: "X"
+            }
+            MouseArea {
+               anchors.fill: parent
+               onClicked: deleteWord();
+            }
+         }
       }
+
       onCountChanged: {
          currentIndex = count-1
       }
@@ -115,9 +189,10 @@ Rectangle {
       anchors.bottom: parent.bottom
       anchors.left: parent.left
       anchors.right: parent.right
+      anchors.margins: 5
       height: cellHeight*3
 
-      cellWidth: width/11.5
+      cellWidth: width/11.0001
       cellHeight: cellWidth
 
       model: game.letters
