@@ -8,6 +8,8 @@ Game::Game(QObject *parent) :
   , rem_consonants_(0)
   , rem_wildcards_(0)
 {
+    qDebug() << "New game here";
+
     letters_ = new Letters(this);
     words_ = new Words(this);
 

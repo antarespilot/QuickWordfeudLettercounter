@@ -16,4 +16,5 @@ RESOURCES += \
     main.qrc
 
 OTHER_FILES += \
-    main.qml
+    main.qml \
+    GameView.qml

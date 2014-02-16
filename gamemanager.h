@@ -21,13 +21,25 @@ public:
     int rowCount(const QModelIndex &parent) const;
     QVariant data(const QModelIndex &index, int role) const;
 
+    Q_INVOKABLE int numGames() const    { return games_.size(); }
+    Q_INVOKABLE Game* game(int idx)     { return games_[idx];   }
+
+    Q_INVOKABLE void addNewGame();
+    Q_INVOKABLE void deleteGame(int game_idx);
+
 protected:
 
     QHash<int, QByteArray> roleNames() const;
 
 private:
 
+
     QList<Game*> games_;
+
+private slots:
+
+    void saveGames();
+    void loadGames();
 
 };
 
