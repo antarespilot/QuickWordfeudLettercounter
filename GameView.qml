@@ -12,6 +12,14 @@ FocusScope {
    property int listWidth: 800
    property int listHeight: 480
    property int minHeight: 50
+   width: listWidth
+
+   property bool isCurrentItem: ListView.isCurrentItem
+   onIsCurrentItemChanged: {
+      if(!isCurrentItem) {
+         state = "Menu";
+      }
+   }
 
    function addLetter(letter) {
       return gameObject.addLetter(letter);
@@ -32,9 +40,8 @@ FocusScope {
       event.accepted = true;
       switch(event.key)
       {
-      case Qt.Key_PageDown:
-      case Qt.Key_PageUp:
-         event.accepted = false;
+      case Qt.Key_Escape:
+         gameView.state = "Menu";
          return;
       case Qt.Key_Backspace:
          backspace();
@@ -69,6 +76,7 @@ FocusScope {
          }
          PropertyChanges { target: keyboard; opacity: 0; }
          PropertyChanges { target: wordlist; opacity: 0; }
+         PropertyChanges { target: gameView.ListView.view; interactive: true }
       },
       State {
          name: "Game"
@@ -79,6 +87,7 @@ FocusScope {
          }
          PropertyChanges { target: keyboard; opacity: 1; }
          PropertyChanges { target: wordlist; opacity: 1; }
+         PropertyChanges { target: gameView.ListView.view; interactive: false }
       }
    ]
 

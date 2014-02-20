@@ -28,11 +28,12 @@ Rectangle {
       id: gameList
       focus: true
       anchors.fill: parent
-      snapMode: ListView.SnapOneItem
+//      snapMode: ListView.SnapOneItem
 //      highlightRangeMode: ListView.StrictlyEnforceRange
 
-      highlightFollowsCurrentItem: true
-      highlightMoveDuration: 200
+//      highlightFollowsCurrentItem: true
+      highlightMoveDuration: 100
+      highlightResizeDuration: 100
 
 //      preferredHighlightBegin: 0
 //      preferredHighlightEnd: 0
@@ -42,7 +43,8 @@ Rectangle {
       delegate: GameView {
          id: gameViewDelegate
          gameObject: game
-         width: gameList.width
+         listWidth: gameList.width
+         listHeight: gameList.height
       }
 
 //      highlight: Rectangle {
@@ -69,6 +71,7 @@ Rectangle {
             decrementCurrentIndex();
             return;
          case Qt.Key_Insert:
+         case Qt.Key_Plus:
             gamemanager.addNewGame();
             return;
          case Qt.Key_Escape:
