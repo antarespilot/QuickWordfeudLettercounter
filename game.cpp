@@ -18,6 +18,20 @@ Game::Game(QObject *parent) :
     updateStats();
 }
 
+void Game::read(const QJsonObject &json)
+{
+    setName(json["name"].toString());
+    words_->read(json);
+    updateLetters();
+    updateStats();
+}
+
+void Game::write(QJsonObject &json) const
+{
+    json["name"] = name();
+    words_->write(json);
+}
+
 void Game::addWord()
 {
     if(!words_->currWord().isEmpty())

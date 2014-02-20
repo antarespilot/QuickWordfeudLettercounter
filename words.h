@@ -2,6 +2,7 @@
 #define WORDS_H
 
 #include <QAbstractListModel>
+#include <QJsonObject>
 
 class Words : public QAbstractListModel
 {
@@ -38,6 +39,9 @@ public:
     explicit Words(QObject *parent = 0);
 
     void initialize();
+
+    void read(const QJsonObject& json);
+    void write(QJsonObject& json) const;
 
     int rowCount(const QModelIndex &parent) const;
     QVariant data(const QModelIndex &index, int role) const;

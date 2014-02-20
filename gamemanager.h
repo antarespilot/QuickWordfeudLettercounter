@@ -12,8 +12,7 @@ public:
 
     enum Roles
     {
-        GameRole = Qt::UserRole,
-        NameRole
+        GameRole = Qt::UserRole
     };
 
     explicit GameManager(QObject *parent = 0);
@@ -32,7 +31,6 @@ protected:
     QHash<int, QByteArray> roleNames() const;
 
 private:
-
 
     QList<Game*> games_;
 

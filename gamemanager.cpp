@@ -3,6 +3,12 @@
 #include <QStandardPaths>
 #include <QDebug>
 
+#include <QJsonArray>
+#include <QJsonObject>
+#include <QJsonDocument>
+#include <QFile>
+#include <QDir>
+
 GameManager::GameManager(QObject *parent) :
     QAbstractListModel(parent)
 {
@@ -10,7 +16,6 @@ GameManager::GameManager(QObject *parent) :
             this, &GameManager::saveGames);
 
     loadGames();
-    addNewGame();
 }
 
 int GameManager::rowCount(const QModelIndex &parent) const
@@ -26,8 +31,6 @@ QVariant GameManager::data(const QModelIndex &index, int role) const
 
     if (role == GameRole)
        return QVariant::fromValue(games_[index.row()]);
-//    else if(role == NameRole)
-//        return
 
     return QVariant();
 
@@ -43,7 +46,7 @@ QHash<int, QByteArray> GameManager::roleNames() const
 void GameManager::addNewGame()
 {
     Game* g = new Game(this);
-    g->setName(QString("NewGame%1").arg(games_.size()));
+    g->setName(QString("Game%1").arg(games_.size()));
     beginInsertRows(QModelIndex(), games_.size(), games_.size());
     games_.append(g);
     endInsertRows();
@@ -63,18 +66,60 @@ void GameManager::deleteGame(int game_idx)
 
 void GameManager::saveGames()
 {
-    qDebug() << "Save games";
-
     QString location = QStandardPaths::writableLocation(QStandardPaths::DataLocation);
-    qDebug() << "It'll go into " << location;
+    QDir dir(location);
+    if(!dir.exists()) {
+        qDebug() << "Directory " << location << " does not yet exist. creating it...";
+        if(!dir.mkpath(location)) {
+            qWarning() << "Was not able to create path " << location;
+            return;
+        }
+    }
 
+    QFile savefile(location + "/games.json");
+    if(!savefile.open(QIODevice::WriteOnly)) {
+        qWarning() << "Unable to open save file " << savefile.fileName();
+        return;
+    }
+
+    QJsonArray array;
+    for(int i=0; i<games_.size(); i++) {
+        QJsonObject obj;
+        games_.at(i)->write(obj);
+        array.append(obj);
+    }
+    QJsonObject savegame;
+    savegame["games"] = array;
+
+    QJsonDocument savedoc(savegame);
+    savefile.write(savedoc.toJson());
 }
 
 void GameManager::loadGames()
 {
-    qDebug() << "Load games";
-
     QString location = QStandardPaths::writableLocation(QStandardPaths::DataLocation);
-    qDebug() << "It'll go into " << location;
+    QFile loadfile(location + "/games.json");
+    if(!loadfile.open(QIODevice::ReadOnly)) {
+        qWarning() << "Unable to open load file " << loadfile.fileName();
+        return;
+    }
 
+    QByteArray gamedata = loadfile.readAll();
+
+    beginResetModel();
+    for(int i=0; i<games_.size(); i++) {
+        games_[i]->deleteLater();
+    }
+    games_.clear();
+
+    QJsonDocument loaddoc(QJsonDocument::fromJson(gamedata));
+    QJsonArray array = loaddoc.object()["games"].toArray();
+    for(int i=0; i<array.size(); i++) {
+        QJsonObject obj = array[i].toObject();
+        Game* g = new Game(this);
+        g->read(obj);
+        games_.append(g);
+    }
+
+    endResetModel();
 }

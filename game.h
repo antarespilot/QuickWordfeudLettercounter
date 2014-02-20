@@ -2,6 +2,7 @@
 #define GAME_H
 
 #include <QAbstractListModel>
+#include <QJsonObject>
 #include "letters.h"
 #include "words.h"
 
@@ -22,6 +23,9 @@ class Game : public QObject
 public:
 
     explicit Game(QObject *parent = 0);
+
+    void read(const QJsonObject& json);
+    void write(QJsonObject& json) const;
 
     Letters* letters() { return letters_;   }
     Words* words() { return words_;         }

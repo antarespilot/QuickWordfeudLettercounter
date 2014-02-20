@@ -17,8 +17,22 @@ FocusScope {
    property bool isCurrentItem: ListView.isCurrentItem
    onIsCurrentItemChanged: {
       if(!isCurrentItem) {
-         state = "Menu";
+         minimize();
       }
+   }
+
+   function toggleExpandMinimize() {
+      if(state === "Game")
+         minimize();
+      else
+         expand();
+   }
+
+   function expand() {
+      state = "Game";
+   }
+   function minimize() {
+      state = "Menu";
    }
 
    function addLetter(letter) {
@@ -51,7 +65,11 @@ FocusScope {
          addWord();
          return;
       case Qt.Key_Delete:
-         deleteWord();
+         if(state === "Game") {
+            deleteWord();
+         } else {
+            gamemanager.deleteGame(index);
+         }
          return;
       }
 
@@ -100,11 +118,7 @@ FocusScope {
    MouseArea {
       anchors.fill: gameView
       onDoubleClicked: {
-         if(gameView.state === "Menu")
-            gameView.state = "Game";
-         else
-            gameView.state = "Menu";
-
+         toggleExpandMinimize()
          gameView.ListView.view.currentIndex = index
          nameInput.focus = false;
       }
@@ -125,8 +139,8 @@ FocusScope {
 
          property int rem: remaining
          property color bgColor: capacity === 0 ? "gray" :
-                                 remaining > 1 ? "green" :
-                                 remaining === 1 ? "orange" : "red"
+                                                  remaining > 1 ? "green" :
+                                                                  remaining === 1 ? "orange" : "red"
 
          Rectangle {
             anchors.fill: parent
@@ -230,21 +244,12 @@ FocusScope {
       }
    }
 
-   ListView {
-
-      id: wordlist
-      anchors.top: stats.bottom
-      anchors.left: parent.left
-      anchors.right: stats.left
-      anchors.bottom: keyboard.top
-      anchors.margins: 5
-
-      model: gameObject ? gameObject.words : null
-
-      delegate: Item {
+   Component {
+      id: wordDelegate
+      Item {
          width: wordlist.width
          height: 30
-         id: wordDelegate
+         id: wordDelegateBase
 
          property bool isCurrentItem: ListView.isCurrentItem
 
@@ -280,7 +285,7 @@ FocusScope {
             radius: 5
 
             ColorAnimation on color { from: "white"; to: "black"; duration: 500; loops: Animation.Infinite; running: cursor.visible }
-            visible: wordDelegate.isCurrentItem
+            visible: wordDelegateBase.isCurrentItem
          }
 
          Rectangle {
@@ -291,7 +296,7 @@ FocusScope {
             height: 25
             color: "red"
             radius: 5
-            visible: wordDelegate.isCurrentItem && index > 0
+            visible: wordDelegateBase.isCurrentItem && index > 0
             Text {
                anchors.centerIn: parent
                color: "white"
@@ -303,11 +308,24 @@ FocusScope {
             }
          }
       }
+   }
 
-      onCountChanged: {
-         currentIndex = count-1
-      }
+   ListView {
 
+      id: wordlist
+      anchors.top: stats.bottom
+      anchors.left: parent.left
+      anchors.right: parent.right
+      anchors.bottom: keyboard.top
+      anchors.margins: 5
+
+      model: gameObject ? gameObject.words : null
+      delegate: wordDelegate
+
+      clip: true
+      onCountChanged: currentIndex = count-1;
+
+      visible: opacity > 0
    }
 
    GridView {
@@ -326,5 +344,29 @@ FocusScope {
 
       interactive: false
       visible: opacity > 0
+
+
+      Rectangle {
+         anchors.right: parent.right
+         anchors.bottom: parent.bottom
+         anchors.margins: 2
+
+         width: keyboard.cellWidth*2-4
+         height: keyboard.cellHeight-4
+
+         radius: 5
+         border.color: "black"
+         border.width: 2
+
+         Text {
+            anchors.centerIn: parent
+            text: "ENTER"
+            font.pixelSize: 35
+         }
+         MouseArea {
+            anchors.fill: parent
+            onClicked: gameView.addWord()
+         }
+      }
    }
 }

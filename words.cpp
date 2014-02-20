@@ -1,4 +1,5 @@
 #include "words.h"
+#include <QJsonArray>
 
 Words::Words(QObject *parent) :
     QAbstractListModel(parent)
@@ -12,6 +13,31 @@ void Words::initialize()
     words_.clear();
     words_.append(Word());
     endResetModel();
+}
+
+void Words::read(const QJsonObject &json)
+{
+    beginResetModel();
+    words_.clear();
+    QJsonArray array = json["words"].toArray();
+    for(int i=0; i<array.size(); i++) {
+        QJsonObject wobj = array[i].toObject();
+        Word w;
+        w.word = wobj["word"].toString();
+        words_.append(w);
+    }
+    endResetModel();
+}
+
+void Words::write(QJsonObject &json) const
+{
+    QJsonArray array;
+    for(int i=0; i<words_.size(); i++) {
+        QJsonObject wobj;
+        wobj["word"] = words_.at(i).word;
+        array.append(wobj);
+    }
+    json["words"] = array;
 }
 
 int Words::rowCount(const QModelIndex &parent) const
