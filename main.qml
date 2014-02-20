@@ -11,19 +11,6 @@ Rectangle {
    height: 480
    color: "#ff333333"
 
-   state: "Menu"
-
-   states: [
-      State {
-         name: "Menu"
-//         PropertyChanges { target: root; color: "red" }
-      },
-      State {
-         name: "Game"
-//         PropertyChanges { target: root; color: "blue" }
-      }
-   ]
-
    ListView {
       id: gameList
       focus: true
@@ -47,9 +34,9 @@ Rectangle {
          listHeight: gameList.height
       }
 
-//      highlight: Rectangle {
-//         color: "blue"
-//      }
+      highlight: Rectangle {
+         color: "#33ffffff"
+      }
 
       onCountChanged: {
          console.log("count changed, it's now at " + count + " curridx " + currentIndex);
@@ -77,14 +64,6 @@ Rectangle {
          case Qt.Key_Escape:
             if(gameList.currentItem)
                gamemanager.deleteGame(gameList.currentIndex);
-            return;
-         case Qt.Key_F1:
-            console.log("F1");
-            gameScreen.state = "Menu";
-            return;
-         case Qt.Key_F2:
-            console.log("F2");
-            gameScreen.state = "Game";
             return;
          }
          event.accepted = false;

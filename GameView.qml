@@ -77,6 +77,7 @@ FocusScope {
          PropertyChanges { target: keyboard; opacity: 0; }
          PropertyChanges { target: wordlist; opacity: 0; }
          PropertyChanges { target: gameView.ListView.view; interactive: true }
+         PropertyChanges { target: nameInput; readOnly: true;  activeFocusOnPress: false; }
       },
       State {
          name: "Game"
@@ -88,6 +89,7 @@ FocusScope {
          PropertyChanges { target: keyboard; opacity: 1; }
          PropertyChanges { target: wordlist; opacity: 1; }
          PropertyChanges { target: gameView.ListView.view; interactive: false }
+         PropertyChanges { target: nameInput; readOnly: false; activeFocusOnPress: true;  }
       }
    ]
 
@@ -104,9 +106,10 @@ FocusScope {
             gameView.state = "Menu";
 
          gameView.ListView.view.currentIndex = index
+         nameInput.focus = false;
       }
       onClicked: {
-
+         nameInput.focus = false;
          gameView.ListView.view.currentIndex = index
       }
    }
@@ -168,6 +171,7 @@ FocusScope {
          property int smallFont: 10
 
          TextInput {
+            id: nameInput
             Layout.fillWidth: true
             text: gameObject.name
             font.pixelSize: statLayout.largeFont
