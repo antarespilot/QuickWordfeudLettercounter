@@ -14,6 +14,8 @@ class Game : public QObject
     Q_PROPERTY(int remConsonants READ remConsonants NOTIFY remConsonantsChanged)
     Q_PROPERTY(int remWildcards READ remWildcards NOTIFY remWildcardsChanged)
 
+    Q_PROPERTY(QString name READ name WRITE setName NOTIFY nameChanged)
+
     Q_PROPERTY(Letters* letters READ letters CONSTANT)
     Q_PROPERTY(Words* words READ words CONSTANT)
 
@@ -34,6 +36,9 @@ public:
     int remConsonants() const   { return rem_consonants_;   }
     int remWildcards() const    { return rem_wildcards_;    }
 
+    const QString& name() const { return name_; }
+    void setName(const QString& name)   { if(name==name_) return; name_ = name; emit nameChanged(); }
+
 private:
 
     Letters* letters_;
@@ -41,6 +46,8 @@ private:
 
     void updateLetters();
     void updateStats();
+
+    QString name_;
 
     int rem_total_;
     int rem_vowels_;
@@ -58,6 +65,8 @@ signals:
     void remVowelsChanged();
     void remConsonantsChanged();
     void remWildcardsChanged();
+
+    void nameChanged();
 
 };
 

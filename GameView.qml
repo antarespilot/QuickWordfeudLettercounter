@@ -3,16 +3,15 @@ import QtQuick.Layouts 1.1
 
 import WFLetterCounter 1.0
 
-Item {
+FocusScope {
 
    id: gameView
 
    property QtObject gameObject
 
-   width: 800
-   height: 480
-
-   focus: true
+   property int listWidth: 800
+   property int listHeight: 480
+   property int minHeight: 50
 
    function addLetter(letter) {
       return gameObject.addLetter(letter);
@@ -28,6 +27,8 @@ Item {
    }
 
    Keys.onPressed: {
+      console.log("gameview key " + event.key);
+
       event.accepted = true;
       switch(event.key)
       {
@@ -52,6 +53,55 @@ Item {
 
       event.accepted = false;
    }
+
+   state: "Menu"
+   onStateChanged: {
+      console.log("State now " + state);
+   }
+
+   states: [
+      State {
+         name: "Menu"
+         PropertyChanges {
+            target: gameView;
+            height: minHeight
+            width: listWidth
+         }
+         PropertyChanges { target: keyboard; opacity: 0; }
+         PropertyChanges { target: wordlist; opacity: 0; }
+      },
+      State {
+         name: "Game"
+         PropertyChanges {
+            target: gameView;
+            height: listHeight
+            width: listWidth
+         }
+         PropertyChanges { target: keyboard; opacity: 1; }
+         PropertyChanges { target: wordlist; opacity: 1; }
+      }
+   ]
+
+   transitions: Transition {
+      NumberAnimation { properties: "height,opacity"; easing.type: Easing.InOutQuad }
+   }
+
+   MouseArea {
+      anchors.fill: gameView
+      onDoubleClicked: {
+         if(gameView.state === "Menu")
+            gameView.state = "Game";
+         else
+            gameView.state = "Menu";
+
+         gameView.ListView.view.currentIndex = index
+      }
+      onClicked: {
+
+         gameView.ListView.view.currentIndex = index
+      }
+   }
+
 
    Component {
       id: letterDelegate
@@ -90,40 +140,93 @@ Item {
 
    Rectangle {
       id: stats
+      anchors.left: parent.left
       anchors.right: parent.right
       anchors.top: parent.top
-      anchors.bottom: keyboard.top
+      height: minHeight - 10
       anchors.margins: 5
-      width: 150
-      color: "transparent"
-      border.color: "black"
-      border.width: 2
+
+      color: "#111111"
       radius: 5
 
-      Text {
+
+      RowLayout {
+         id: statLayout
          anchors.fill: parent
          anchors.margins: 5
-         font.pixelSize: 22
-         color: "white"
-         text: "Total left:<br><b>" + gameObject.remTotal
-               + "</b><br>Vowels:<br><b>" + gameObject.remVowels
-               + "</b><br>Consonants:<br><b>" + gameObject.remConsonants
-               + "</b><br>Wildcards:<br><b>" + gameObject.remWildcards
-         textFormat: Text.StyledText
+
+         property int largeFont: 22
+         property int smallFont: 10
+
+         TextInput {
+            Layout.fillWidth: true
+            text: gameObject.name
+            font.pixelSize: statLayout.largeFont
+            color: "white"
+            onTextChanged: gameObject.name = text;
+            maximumLength: 32
+         }
+
+         Text {
+            text: "Total"
+            font.pixelSize: statLayout.smallFont
+            color: "white"
+         }
+
+         Text {
+            text: gameObject.remTotal
+            font.pixelSize: statLayout.largeFont
+            color: "white"
+         }
+
+         Text {
+            text: "Vowels"
+            font.pixelSize: statLayout.smallFont
+            color: "white"
+         }
+
+         Text {
+            text: gameObject.remVowels
+            font.pixelSize: statLayout.largeFont
+            color: "white"
+         }
+
+         Text {
+            text: "Consonants"
+            font.pixelSize: statLayout.smallFont
+            color: "white"
+         }
+
+         Text {
+            text: gameObject.remConsonants
+            font.pixelSize: statLayout.largeFont
+            color: "white"
+         }
+
+         Text {
+            text: "Wildcards"
+            font.pixelSize: statLayout.smallFont
+            color: "white"
+         }
+
+         Text {
+            text: gameObject.remWildcards
+            font.pixelSize: statLayout.largeFont
+            color: "white"
+         }
       }
    }
 
    ListView {
 
       id: wordlist
-      anchors.top: parent.top
+      anchors.top: stats.bottom
       anchors.left: parent.left
       anchors.right: stats.left
       anchors.bottom: keyboard.top
       anchors.margins: 5
-      clip: true
 
-      model: gameObject.words
+      model: gameObject ? gameObject.words : null
 
       delegate: Item {
          width: wordlist.width
@@ -205,9 +308,10 @@ Item {
       cellWidth: width/11.0001
       cellHeight: cellWidth
 
-      model: gameObject.letters
+      model: gameObject ? gameObject.letters : null
       delegate: letterDelegate
 
       interactive: false
+      visible: opacity > 0
    }
 }

@@ -10,11 +10,6 @@ GameManager::GameManager(QObject *parent) :
             this, &GameManager::saveGames);
 
     loadGames();
-
-    addNewGame();
-    addNewGame();
-    addNewGame();
-    addNewGame();
     addNewGame();
 }
 
@@ -47,8 +42,9 @@ QHash<int, QByteArray> GameManager::roleNames() const
 
 void GameManager::addNewGame()
 {
-    beginInsertRows(QModelIndex(), games_.size()-1, games_.size()-1);
     Game* g = new Game(this);
+    g->setName(QString("NewGame%1").arg(games_.size()));
+    beginInsertRows(QModelIndex(), games_.size(), games_.size());
     games_.append(g);
     endInsertRows();
 }
@@ -60,8 +56,9 @@ void GameManager::deleteGame(int game_idx)
 
     beginRemoveRows(QModelIndex(), game_idx, game_idx);
     Game* gameless = games_.takeAt(game_idx);
-    delete gameless;
     endRemoveRows();
+
+    gameless->deleteLater();
 }
 
 void GameManager::saveGames()

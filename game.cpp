@@ -32,14 +32,17 @@ void Game::deleteWord()
 
 bool Game::addLetter(const QString &letter)
 {
-    if(!letters_->letterAvailable(letter.toUpper()))
+    if(!letters_->letterAvailable(letter.toUpper())) {
+        qDebug() << "Game: letter " << letter << " not available";
         return false;
+    }
 
     if(words_->addLetter(letter.toUpper())) {
         updateLetters();
         return true;
     }
 
+    qDebug() << "Game: cannot add letter " << letter;
     return false;
 }
 
